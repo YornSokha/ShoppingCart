@@ -6,34 +6,37 @@ import java.util.Scanner;
 
 public class Main {
 	
-	public static Scanner in = new Scanner(System.in);
+	public static Scanner scanner = new Scanner(System.in);
 
 	public static List<Customer> customers = new ArrayList<Customer>();
+	
+	private static List<Product> products = new ArrayList<Product>();
 	
 	public static void main(String[] args) {	
 		String option;
 		
-		List<Product> products = new ArrayList<Product>();
-		Cart cart = new Cart();;
+
+		Cart cart = new Cart();
+//		Scanner scanner = new Scanner(System.in);
 		/*Initialize 3 products and add to list of Products */		 
 		products.add(new Product("001","Laptop","Product of Cambodia", 10, 1000));
 		products.add(new Product("002","Desktop","Product of Cambodia", 100, 1100));
 		products.add(new Product("003","Mouse","Product of Cambodia", 100, 10));
 		
-		
-		do {
+		boolean quit = false;
+		while(!quit) {
 			option = menu();
 			switch(option) {
 			case "1":
-					createNewProduct(products);
+					createNewProduct();
 				break;
 				
 			case "2":
-					showProductList(products);
+					showProductList();
 				break;
 				
 			case "3":
-					shoppingProduct(products, cart);
+					shoppingProduct(cart);
 				break;
 			case "4":
 				String key;
@@ -43,10 +46,10 @@ public class Main {
 						System.out.println("	1. Remove item");
 						System.out.println("	2. Add more item(s)");
 						System.out.println("	3. Back to Main Menu");
-						key = in.nextLine();
+						key = scanner.nextLine();
 						switch(key) {
 						case "1":
-							System.out.println("Input product ID or Name to remove : "); String x = in.nextLine();
+							System.out.println("Input product ID remove : "); String x = scanner.nextLine();
 								for(Purchase pur : cart.getPurchasedItems()) {
 									if(pur.getProductName().equalsIgnoreCase(x) || pur.getOrderNo().equalsIgnoreCase(x)) {
 											//cart.removeItem(pur);		
@@ -68,14 +71,14 @@ public class Main {
 							break;
 						case "2":
 							System.out.println("---------------------Shopping more product(s)---------------------");
-								shoppingProduct(products, cart);
+								shoppingProduct(cart);
 							break;
 						}
 					}while(!key.equalsIgnoreCase("3"));
 				}	
 				else {
 					System.out.println("Sorry, you haven't shopped any product yet\nPlease go to buy our product first");	
-					in.nextLine();
+					scanner.nextLine();
 				}
 				break;
 			case "5":
@@ -86,18 +89,18 @@ public class Main {
 					System.out.println("	2. Cancel Order");
 					System.out.println("	3. View Shopping History");
 					System.out.println("	4. Go back to Main Menu");
-					ch = in.nextLine();
+					ch = scanner.nextLine();
 					switch(ch) {
 					case "1":
 						if(!cart.getPurchasedItems().isEmpty()) {
 							System.out.println("-------------------------------Before Check out, give me your information-------------------------------");
-							System.out.println("Enter your identification Number : "); String id = in.nextLine();
-							System.out.println("Enter your name : "); String name = in.nextLine();
-							System.out.println("Enter your email : "); String email = in.nextLine();
-							System.out.println("Enter your shipping address : "); String shippingAddress = in.nextLine();
-							System.out.println("Enter your billing address :  "); String billingAddress = in.nextLine();
+							System.out.println("Enter your identification Number : "); String id = scanner.nextLine();
+							System.out.println("Enter your name : "); String name = scanner.nextLine();
+							System.out.println("Enter your email : "); String email = scanner.nextLine();
+							System.out.println("Enter your shipping address : "); String shippingAddress = scanner.nextLine();
+							System.out.println("Enter your billing address :  "); String billingAddress = scanner.nextLine();
 							System.out.println("\n-------------------------------Do you have discount card?---------------------------------------------");
-							System.out.println("\nEnter Pertage on your discount card : "); double discountCard = in.nextDouble();
+							System.out.println("\nEnter Pertage on your discount card : "); double discountCard = scanner.nextDouble();
 							//
 							customer = new Customer(id, name, email, shippingAddress, billingAddress);
 							customer.placeOrder(cart);
@@ -109,11 +112,11 @@ public class Main {
 							showCustomer(customer);
 							cart = new Cart();
 							System.out.println("Arigato!!!!");
-							in.nextLine();
+							scanner.nextLine();
 						}
 						else {
 							System.out.println("Please go to shopping frist!!!");
-							in.nextLine();
+							scanner.nextLine();
 						}
 						break;
 					case "2":
@@ -126,20 +129,20 @@ public class Main {
 							System.out.println("There is no product in cart...");
 						}
 						
-						in.nextLine();
+						scanner.nextLine();
 
 						break;
 					case "3":
 						String st;
 						if(!customers.isEmpty()) {
 							do {
-								showShoppingHistory(customers);
+								showShoppingHistory();
 								System.out.println("1. Search Customer by customer ID");
 								System.out.println("2. Go back");
-								st = in.nextLine();
+								st = scanner.nextLine();
 								switch(st) {
 								case "1":
-									System.out.println("Enter Customer ID : "); String cusID = in.nextLine();
+									System.out.println("Enter Customer ID : "); String cusID = scanner.nextLine();
 									searchCustomer(cusID);	
 									break;
 								}
@@ -154,10 +157,18 @@ public class Main {
 				break;
 					
 			}
-		}while(!option.equals("6"));
+			System.out.print("Do you want to continue to Main Menu? (Y/N)\n");
+//            if(scanner.next().equalsIgnoreCase("Y"))
+//                menu();
+//            else
+//                quit = true;
+			if(!scanner.next().equalsIgnoreCase("Y"))
+				quit = true;
+		}
 	}
 	
 	public static String menu() {
+
 		String option;
 		Scanner in = new Scanner(System.in);
 		DrawingTable drawingTable1 = new DrawingTable();
@@ -175,64 +186,56 @@ public class Main {
 		return option;
 	}
 	
-	public static void createNewProduct(List<Product> products) {
-		String choice;
-		again:
-			while(true) {
-				System.out.println("-----------------Create New Product---------------\n");
-				System.out.print("Enter Your Product ID : "); String proID = in.nextLine();
-				//Checking the duplicated product id
-					for(Product product : products) {
-						if(product.isDuplicatedProductID(proID) == true) {
-							System.out.print("The new entered Product is already existed");
-							System.out.print("New Product ID? (Y/N)");
-							String a = in.nextLine();
-								if(a.equalsIgnoreCase("y"))
-									continue again;
-								else 
-									break again;
-						}
-					}
-				//
-					System.out.print("\nEnter Your product name : "); String proName = in.nextLine();
-					System.out.print("Enter Your Product Description : "); String description = in.nextLine();
-					System.out.print("Enter Quanlity of Your Product : "); double qty = in.nextDouble();
-					System.out.print("Enter Price of Your Product : "); double price = in.nextDouble();
-					Product newProduct = new Product(proID, proName, description, qty, price);
-					products.add(newProduct);
-				System.out.println("Do you want to add more Product? (Y/N)");
-				in.nextLine();
-				choice = in.nextLine();
-				if(choice.equalsIgnoreCase("Y")) continue again;
-				else break;
-			}
+    private static Product findProduct(String id) {
+        for(Product product : products)
+            if(product.getID().equalsIgnoreCase(id))
+                return product;
+        return null;
+    }
+    
+	public static void createNewProduct() {
+		 do{
+             System.out.println("----------------- Create New Product --------------------\n");
+             System.out.print("Enter your product code:\n");
+             scanner.nextLine();
+             String code = scanner.nextLine();
+             Product p = findProduct(code);
+             if(p == null) {
+            	 System.out.print("Enter your product name:\n");
+                 String name = scanner.nextLine();
+                 System.out.print("Enter your product description:\n");
+                 String description = scanner.nextLine();
+                 System.out.print("Enter your product price:\n");
+                 double price = scanner.nextDouble();
+                 System.out.print("Enter your product quantity:\n");
+                 double qty = scanner.nextDouble();
+                 addNewProduct(new Product(code, name, description, price, qty));
+                 System.out.println("Product name : " + name + " with code " + code + " is added into stock.");
+             }
+             else
+                 System.out.println("Product code : " + code + " is already existed!");
+             System.out.println("---------------------------------------------------\n" +
+                     "Do you want to add more product? (Y/N)");
+         }while(scanner.next().equalsIgnoreCase("Y"));
+      
 	}
 	
-	public static void showProductList(List<Product> products) {
-		String choice;
+    private static void addNewProduct(Product product){
+        products.add(product);
+    }
+	
+	public static void showProductList() {
 		DrawingTable drawingTable;
-		again:
-			while(true) {
-				System.out.println("----------------------Product List-------------------------\n");
-				drawingTable = new DrawingTable();
-				drawingTable.setHeaders(" ID ", " Name ", " QTY ", " Price ", " Description ");
-				for(Product product : products) {
-					drawingTable.addRow(product.getID() , product.getName(), product.getQtyInStock() + "", product.getPrice() + "", product.getDescription());
-				}
-				
-				drawingTable.print();
-				System.out.println("Do you want to continue to Main Menu? (Y/N)");
-				choice = in.nextLine();
-				if(choice.equalsIgnoreCase("y")) {
-					break again;
-				}
-				else {
-					continue again;
-				}
+		System.out.println("----------------------Product List-------------------------\n");
+		drawingTable = new DrawingTable();
+		drawingTable.setHeaders(" ID ", " Name ", " QTY ", " Price ", " Description ");
+		for(Product p : products) {
+			drawingTable.addRow(p.getID() , p.getName(), p.getQtyInStock() + "", p.getPrice() + "", p.getDescription());		
 			}
+		drawingTable.print();
 	}
 	
-	public static void showShoppingHistory(List<Customer> customer) {
+	public static void showShoppingHistory() {
 		DrawingTable drawingTable = new DrawingTable();
 		System.out.println("-----------------Shopping History------------------");
 		
@@ -272,7 +275,7 @@ public class Main {
 		System.out.println("\nSubTotal : " + customer.getCart().calculateSubTotal());
 		System.out.println("Discount : " + customer.getCart().getDiscount());
 		System.out.println("Total : " + customer.getCart().calculateTotal());
-		in.nextLine();
+		scanner.nextLine();
 		
 	}
 	
@@ -289,44 +292,38 @@ public class Main {
 		}
 	}
 	
-	public static void shoppingProduct(List<Product> products, Cart cart) {
+	public static void shoppingProduct(Cart cart) {
 		String choice;
 		//cart = new Cart();
 		System.out.println("\n-----------------------Let's go shopping products you want---------------------------------");
 		again:
 			while(true) {
 				boolean i = false;
-				System.out.print("Enter product code you want to buy : "); String proCode = in.nextLine();
-				//
-				for(Product product : products) {
-					if(product.getID().equalsIgnoreCase(proCode)) {
-						System.out.print("Enter product qty you want to buy : "); double qty = in.nextDouble();
-						for(Product product1 : products) {
-							if(product1.getID().equalsIgnoreCase(proCode)) {
-								i = true;
-								if(product1.isValidStock(qty) == false) {
-									System.out.print("Not enough stock!!! Product with code " + product1.getID() + " has only " + product1.getQtyInStock() + " in stock");
-									in.nextLine();
-								}
-								else 
-									{
-										product1.setQtyInStock(product1.getQtyInStock() - qty); //reduce product in stock	
-										System.out.print("Enter discount for this product if you have: "); double discount = in.nextDouble();
-										Purchase purchase = new Purchase(proCode, product1, qty, discount);
-							
-										cart.addItem(purchase);	
-										
-										System.out.println("------------------------------------------------------------");
-										System.out.println("Do you want to shop more product?(Y/N)");
-										in.nextLine();
-										choice = in.nextLine(); 
-										if(choice.equalsIgnoreCase("y")) continue again;
-										else break again;
-										
-									}
+				System.out.print("Enter product code you want to buy : "); 
+				String proCode = scanner.nextLine();
+				System.out.println(proCode);
+				Product product = findProduct(proCode);
+				if(product != null) {
+					i = true;
+					System.out.print("Enter product qty you want to buy : "); double qty = scanner.nextDouble();
+							if(product.isValidStock(qty)) {
+								
+								product.setQtyInStock(product.getQtyInStock() - qty); //reduce product in stock	
+								System.out.print("Enter discount for this product if you have: "); double discount = scanner.nextDouble();
+								Purchase purchase = new Purchase(proCode, product, qty, discount);
+								cart.addItem(purchase);	
+								System.out.println("------------------------------------------------------------");
+								System.out.println("Do you want to shop more product?(Y/N)");
+								scanner.nextLine();
+								choice = scanner.nextLine(); 
+								if(choice.equalsIgnoreCase("y")) continue again;
+								else break again;
 							}
-						}
-					}
+							else {
+							
+								System.out.print("Not enough stock!!! Product with code " + product.getID() + " has only " + product.getQtyInStock() + " in stock");
+								scanner.nextLine();		
+							}
 				}
 				
 				if(i == false) {
@@ -335,7 +332,7 @@ public class Main {
 				
 				System.out.println("------------------------------------------------------------");
 				System.out.println("Do you want to shop other product?(Y/N)");
-				choice = in.nextLine(); 
+				choice = scanner.nextLine(); 
 			
 				System.out.println(choice);
 				if(choice.equalsIgnoreCase("y")) continue again;

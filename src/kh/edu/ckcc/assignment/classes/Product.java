@@ -17,8 +17,8 @@ public class Product {
 	
 	//method to check validable qty of products in stock
 	public boolean isValidStock(double qty) {
-		if(qtyInStock >= qty) return true;
-		return false;
+		if(qtyInStock < qty) return false;
+		return true;
 	}
 	
 	//Method to check the duplicated product ID
