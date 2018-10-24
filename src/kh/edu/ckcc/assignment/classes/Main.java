@@ -12,10 +12,10 @@ public class Main {
 	
 	private static List<Product> products = new ArrayList<Product>();
 	
+	private static int purchaseNo = 1;
+	
 	public static void main(String[] args) {	
 		String option;
-		
-
 		Cart cart = new Cart();
 //		Scanner scanner = new Scanner(System.in);
 		/*Initialize 3 products and add to list of Products */		 
@@ -49,18 +49,25 @@ public class Main {
 						key = scanner.nextLine();
 						switch(key) {
 						case "1":
-							System.out.println("Input product ID remove : "); String x = scanner.nextLine();
+							System.out.println("Input purchase No to remove : "); String purNo = scanner.next();
 								for(Purchase pur : cart.getPurchasedItems()) {
-									if(pur.getProductName().equalsIgnoreCase(x) || pur.getOrderNo().equalsIgnoreCase(x)) {
+									if(pur.getOrderNo().equals(purNo)) {
 											//cart.removeItem(pur);		
-										if(cart.getPurchasedItemAmount() > 1) {
-											pur.getProduct().setQtyInStock(pur.getProduct().getQtyInStock() + pur.getQty());
-											cart.removeItem(pur);
-										}
-										else
-											pur.getProduct().setQtyInStock(pur.getProduct().getQtyInStock() + pur.getQty());
-											cart = new Cart();
-										System.out.println("Product was successfully removed!!");
+										Purchase cancelledPurchase = pur;
+				                        for(int j = 0; j < products.size(); j++) {				                           
+				                                Product product = products.get(j);
+				                                if((product.getID()).equals(cancelledPurchase.getProduct().getID())){
+				                                    products.set(j, new Product(
+				                                            product.getID(), product.getName(),
+				                                            product.getDescription(),
+				                                            product.getPrice(),
+				                                            product.getQtyInStock() + cancelledPurchase.getQty()));
+				                                }
+				                                
+				                        }
+				                        cart.removeItem(pur);				         
+				                        System.out.println("You products have been removeed!");
+				                        break;
 									}
 									else {
 										System.out.println("Invalid product name or Order ID");
@@ -162,7 +169,7 @@ public class Main {
 //                menu();
 //            else
 //                quit = true;
-			if(!scanner.next().equalsIgnoreCase("Y"))
+			if(!scanner.nextLine().equalsIgnoreCase("Y"))
 				quit = true;
 		}
 	}
@@ -197,7 +204,7 @@ public class Main {
 		 do{
              System.out.println("----------------- Create New Product --------------------\n");
              System.out.print("Enter your product code:\n");
-             scanner.nextLine();
+             scanner.next();
              String code = scanner.nextLine();
              Product p = findProduct(code);
              if(p == null) {
@@ -216,6 +223,7 @@ public class Main {
                  System.out.println("Product code : " + code + " is already existed!");
              System.out.println("---------------------------------------------------\n" +
                      "Do you want to add more product? (Y/N)");
+             scanner.next();
          }while(scanner.next().equalsIgnoreCase("Y"));
       
 	}
@@ -310,7 +318,7 @@ public class Main {
 								
 								product.setQtyInStock(product.getQtyInStock() - qty); //reduce product in stock	
 								System.out.print("Enter discount for this product if you have: "); double discount = scanner.nextDouble();
-								Purchase purchase = new Purchase(proCode, product, qty, discount);
+								Purchase purchase = new Purchase("" + purchaseNo++, product, qty, discount);
 								cart.addItem(purchase);	
 								System.out.println("------------------------------------------------------------");
 								System.out.println("Do you want to shop more product?(Y/N)");
