@@ -16,8 +16,8 @@ public class Main {
 	
 	public static void main(String[] args) {	
 		String option;
+		Customer customer;
 		Cart cart = new Cart();
-//		Scanner scanner = new Scanner(System.in);
 		/*Initialize 3 products and add to list of Products */		 
 		products.add(new Product("001","Laptop","Product of Cambodia", 10, 1000));
 		products.add(new Product("002","Desktop","Product of Cambodia", 100, 1100));
@@ -55,7 +55,8 @@ public class Main {
 								break;
 								
 							case "2":
-								System.out.println("Input purchaseNo to remove : "); String purNo = scanner.nextLine();
+								System.out.println("Input purchaseNo to remove : "); 
+								String purNo = scanner.nextLine();
 								boolean exist = false;
 									for(Purchase pur : cart.getPurchasedItems()) {
 										if(pur.getOrderNo().equals(purNo)) {
@@ -97,12 +98,10 @@ public class Main {
 					}
 					break;
 				case "5":
-					String ch;
-					Customer customer = null;	
+					String ch;	
 					do {
 						System.out.println("	1. Add new Customer to check out");
-						System.out.println("	2. Cancel Order");
-						System.out.println("	3. Go back to Main Menu");
+						System.out.println("	2. Go back to Main Menu");
 						ch = scanner.nextLine();
 						switch(ch) {
 						case "1":
@@ -125,6 +124,8 @@ public class Main {
 								
 								showCustomer(customer);
 								cart = new Cart();
+								// renew purchaseNo for new customer
+								purchaseNo = 1;
 								System.out.println("Arigato!!!!");
 								scanner.nextLine();
 							}
@@ -133,36 +134,56 @@ public class Main {
 								scanner.nextLine();
 							}
 							break;
-						case "2":
-							if(!cart.getPurchasedItems().isEmpty()) {
-								//customer.cancelOrder();
-								customer = new Customer();
-								System.out.println("Cart was completely removed!!!");
-							}
-							else {
-								System.out.println("There is no product in cart...");
-							}
-							scanner.nextLine();
-							break;
+						
 						}
-					}while(!ch.equals("3"));				
+					}while(!ch.equals("2"));				
 					break;				
 				case "6":
 					String st;
+					Customer c;
 					if(!customers.isEmpty()) {
 						do {
 							showShoppingHistory();
 							System.out.println("1. Search Customer's invoice");
-							System.out.println("2. Go back");
+							System.out.println("2. Cancel Order");
+							System.out.println("3. Go back");
 							st = scanner.nextLine();
+							String cusID;
 							switch(st) {
 								case "1":
 									System.out.println("Enter Customer ID : "); 
-									String cusID = scanner.nextLine();
-									searchCustomer(cusID);	
+									cusID = scanner.nextLine();
+									c = findCustomer(cusID);
+									showCustomer(c);
+									break;
+								case "2":
+									System.out.println("Enter Customer ID : "); 
+									cusID = scanner.nextLine();
+									c = findCustomer(cusID);
+									if(c != null) {
+										List<Purchase> cancelledPurchase = c.getCart().getPurchasedItems();
+				                        for(int j = 0; j < products.size(); j++) {
+				                        	
+			                                Product product = products.get(j);
+				                        	for(int k = 0; k < cancelledPurchase.size(); k++){
+
+				                                if((product.getID()).equals(cancelledPurchase.get(k).getProduct().getID())){
+				                                    products.set(j, new Product(
+				                                            product.getID(), product.getName(),
+				                                            product.getDescription(),				                                           
+				                                            product.getQtyInStock() + cancelledPurchase.get(k).getQty(),
+				                                            product.getPrice()));
+				                                }
+
+				                            }	
+
+				                        }
+				                            									}
+									customers.remove(c);
+									
 									break;
 							}
-						}while(!st.equals("2"));
+						}while(!st.equals("3"));
 					}
 					else {
 						System.out.println("No any customers to view!!!");
@@ -210,7 +231,6 @@ public class Main {
 		 do{
              System.out.println("----------------- Create New Product --------------------\n");
              System.out.print("Enter your product code:\n");
-//             scanner.nextLine();
              String code = scanner.nextLine();
              Product p = findProduct(code);
              if(p == null) {
@@ -229,7 +249,6 @@ public class Main {
                  System.out.println("Product code : " + code + " is already existed!");
              System.out.println("---------------------------------------------------\n" +
                      "Do you want to add more product? (Y/N)");
-             scanner.nextLine();
          }while(scanner.nextLine().equalsIgnoreCase("Y"));
       
 	}
@@ -286,29 +305,22 @@ public class Main {
 		
 		System.out.println(customer.toString());
 		showMyShoppingCart(customer.getCart());
-		System.out.println("\nSubTotal : " + customer.getCart().calculateSubTotal());
-		System.out.println("Discount : " + customer.getCart().getDiscount());
-		System.out.println("Total : " + customer.getCart().calculateTotal());
+		System.out.println("\nSubTotal : $" + customer.getCart().calculateSubTotal());
+		System.out.println("Discount : " + (customer.getCart().getDiscount()*100) + "%");
+		System.out.println("Total : $" + customer.getCart().calculateTotal());
 		scanner.nextLine();
 		
 	}
 	
-	public static void searchCustomer(String customerID) {
-		boolean i = false;
-		for(Customer customer : customers) {
-			if(customer.getCustomerID().equals(customerID)) {
-				showCustomer(customer);
-				i = true;
-			}
-		}
-		if(i == false) {
-			System.out.println("Invalid Customer ID");
-		}
+	public static Customer findCustomer(String customerID) {
+		for(Customer customer : customers)
+			if(customer.getCustomerID().equals(customerID))
+				return customer;
+		return null;
 	}
 	
 	public static void shoppingProduct(Cart cart) {
 		String choice;
-		//cart = new Cart();
 		System.out.println("\n-----------------------Let's go shopping products you want---------------------------------");
 		again:
 			while(true) {

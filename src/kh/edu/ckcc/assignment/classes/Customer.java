@@ -14,6 +14,7 @@ public class Customer {
 		this.email = email;
 		this.shippingAddress = shippingAddress;
 		this.billingAddress = billingAddress;
+		shoppingCart = new Cart();
 	}
 	
 	public Customer() {
