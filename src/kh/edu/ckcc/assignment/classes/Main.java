@@ -162,17 +162,14 @@ public class Main {
 									c = findCustomer(cusID);
 									if(c != null) {
 										List<Purchase> cancelledPurchase = c.getCart().getPurchasedItems();
-				                        for(int j = 0; j < products.size(); j++) {
-				                        	
-			                                Product product = products.get(j);
+										System.out.println("size : " + cancelledPurchase.size());
+				                        for(int j = 0; j < products.size(); j++) {				                        	
+			                                
+				                        	Product product = products.get(j);
 				                        	for(int k = 0; k < cancelledPurchase.size(); k++){
-
-				                                if((product.getID()).equals(cancelledPurchase.get(k).getProduct().getID())){
-				                                    products.set(j, new Product(
-				                                            product.getID(), product.getName(),
-				                                            product.getDescription(),				                                           
-				                                            product.getQtyInStock() + cancelledPurchase.get(k).getQty(),
-				                                            product.getPrice()));
+				                                
+				                        		if((product.getID()).equals(cancelledPurchase.get(k).getProduct().getID())){
+				                                    product.setQtyInStock(product.getQtyInStock() + cancelledPurchase.get(k).getQty());
 				                                }
 
 				                            }	
