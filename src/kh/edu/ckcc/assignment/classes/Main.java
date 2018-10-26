@@ -7,16 +7,12 @@ import java.util.Scanner;
 public class Main {
 	
 	public static Scanner scanner = new Scanner(System.in);
-
 	public static List<Customer> customers = new ArrayList<Customer>();
-	
 	private static List<Product> products = new ArrayList<Product>();
-	
 	private static int purchaseNo = 1;
 	
 	public static void main(String[] args) {	
 		String option;
-		Customer customer;
 		Cart cart = new Cart();
 		initialDefaultProduct();
 		
@@ -55,7 +51,6 @@ public class Main {
 					
 					break;
 				case "4":
-					String key;
 					boolean back = false;
 					if(!cart.isEmpty()) {
 						do {
@@ -63,7 +58,7 @@ public class Main {
 							System.out.println("	1. Add more purchase");
 							System.out.println("	2. Remove purchase");
 							System.out.println("	3. Back");
-							key = scanner.nextLine();
+							String key = scanner.nextLine();
 							switch(key) {
 							case "1":
 								System.out.println("---------------------Shopping more product(s)---------------------");
@@ -71,32 +66,7 @@ public class Main {
 								break;
 								
 							case "2":
-								System.out.println("Input purchaseNo to remove : "); 
-								String purNo = scanner.nextLine();
-								boolean exist = false;
-								Purchase pur = findPurchase(purNo, cart.getPurchasedItems());
-								if(pur != null) {
-									Purchase cancelledPurchase = pur;
-			                        for(int j = 0; j < products.size(); j++) {				                           
-			                                Product product = products.get(j);
-			                                if((product.getID()).equals(cancelledPurchase.getProduct().getID())){
-			                                    products.set(j, new Product(
-			                                            product.getID(), product.getName(),
-			                                            product.getDescription(),
-			                                            product.getQtyInStock() + cancelledPurchase.getQty(),
-			                                            product.getPrice()));
-			                                }			                        
-			                        cart.removeItem(pur);				         
-			                        System.out.println("You products have been removed!");
-			                        exist = true;
-			                        break;
-								}
-									
-							}																								
-								if(!exist){
-									System.out.println("Invalid product name or Order ID");
-								}
-								
+								removePurchase(cart);
 								break;
 							case "3":
 								back = true;
@@ -118,49 +88,8 @@ public class Main {
 						ch = scanner.nextLine();
 						switch(ch) {
 						case "1":
-							if(!cart.isEmpty()) {
-								System.out.println("-------------------------------Before Check out, give me your information-------------------------------");
-								System.out.println("Enter your identification Number : "); 
-								String id = scanner.nextLine();
-								System.out.println("Enter your name : "); 
-								String name = scanner.nextLine();
-								System.out.println("Enter your email : "); 
-								String email = scanner.nextLine();
-								System.out.println("Enter your shipping address : "); 
-								String shippingAddress = scanner.nextLine();
-								System.out.println("Enter your billing address :  "); 
-								String billingAddress = scanner.nextLine();
-								System.out.println("\n-------------------------------Do you have discount card?---------------------------------------------");
-								double discountCard = 0D;
-								try {
-									System.out.println("\nEnter Pertage on your discount card : "); 
-									discountCard = scanner.nextDouble();	
-								}catch(Exception e) {
-									System.out.println("Discount must be double!\n"
-											+ "Checkout unsuccessful!");
-									scanner.nextLine();
-									break;
-								}
-								
-								
-								cart.setDiscount(discountCard);
-								customer = new Customer(id, name, email, shippingAddress, billingAddress);
-								customer.placeOrder(cart);
-								customers.add(customer);
-								
-								System.out.println("\n------------------------------------Your purchased Invoice----------------------------------------------");
-								
-								showCustomer(customer);
+							if(addCustomer(cart))
 								cart = new Cart();
-								// renew purchaseNo for new customer
-								purchaseNo = 1;
-								System.out.println("Arigato!!!!");
-								scanner.nextLine();
-							}
-							else {
-								System.out.println("Please go to shopping frist!!!");
-								scanner.nextLine();
-							}
 							break;
 						
 						}
@@ -173,8 +102,7 @@ public class Main {
 						do {
 							showShoppingHistory();
 							System.out.println("1. Search Customer's invoice");
-							System.out.println("2. Cancel Order");
-							System.out.println("3. Go back");
+							System.out.println("2. Go back");
 							st = scanner.nextLine();
 							String cusID;
 							switch(st) {
@@ -182,33 +110,14 @@ public class Main {
 									System.out.println("Enter Customer ID : "); 
 									cusID = scanner.nextLine();
 									c = findCustomer(cusID);
-									showCustomer(c);
-									break;
-								case "2":
-									System.out.println("Enter Customer ID : "); 
-									cusID = scanner.nextLine();
-									c = findCustomer(cusID);
-									if(c != null) {
-										List<Purchase> cancelledPurchase = c.getCart().getPurchasedItems();
-										System.out.println("size : " + cancelledPurchase.size());
-				                        for(int j = 0; j < products.size(); j++) {				                        	
-			                                
-				                        	Product product = products.get(j);
-				                        	for(int k = 0; k < cancelledPurchase.size(); k++){
-				                                
-				                        		if((product.getID()).equals(cancelledPurchase.get(k).getProduct().getID())){
-				                                    product.setQtyInStock(product.getQtyInStock() + cancelledPurchase.get(k).getQty());
-				                                }
-
-				                            }	
-
-				                        }
-				                            									}
-									customers.remove(c);
-									
-									break;
+									if(c != null)
+										showCustomer(c);
+									else
+										System.out.println("Customer is not found!");
+									scanner.nextLine();
+									break;															 
 							}
-						}while(!st.equals("3"));
+						}while(!st.equals("2"));
 					}
 					else {
 						System.out.println("No any customers to view!!!");
@@ -216,31 +125,13 @@ public class Main {
 					break;
 			}
 			System.out.print("Do you want to continue to Main Menu? (Y/N)\n");
-//            if(scanner.next().equalsIgnoreCase("Y"))
-//                menu();
-//            else
-//                quit = true;
 			if(!scanner.nextLine().equalsIgnoreCase("Y"))
 				quit = true;
 		}
 	}
 	
-	private static void initialDefaultProduct() {
-		// /*Initialize 3 products and add to list of Products */		 
-		products.add(new Product("001","Laptop","Product of Cambodia", 500, 1000));
-		products.add(new Product("002","Desktop","Product of Cambodia", 340, 1000));
-		products.add(new Product("003","Mouse","Product of Cambodia", 10, 1000));
-		
-	}
 
-	public static Purchase findPurchase(String purNo, List<Purchase> purchased) {
-		for(Purchase pu : purchased)
-			if(pu.getOrderNo().equals(purNo))
-				return pu;
-		return null;
-	}
-
-	public static String menu() {
+	private static String menu() {
 
 		String option;
 		DrawingTable drawingTable1 = new DrawingTable();
@@ -258,15 +149,15 @@ public class Main {
 		option = scanner.nextLine();
 		return option;
 	}
-	
-    private static Product findProduct(String id) {
-        for(Product product : products)
-            if(product.getID().equalsIgnoreCase(id))
-                return product;
-        return null;
-    }
-    
-	public static void createNewProduct() {
+	private static void initialDefaultProduct() {
+		// /*Initialize 3 products and add to list of Products */		 
+		products.add(new Product("001","Laptop","Product of Cambodia", 500, 1000));
+		products.add(new Product("002","Desktop","Product of Cambodia", 340, 1000));
+		products.add(new Product("003","Mouse","Product of Cambodia", 10, 1000));
+		
+	}
+
+	private static void createNewProduct() {
 		 
              System.out.println("----------------- Create New Product --------------------\n");
              System.out.print("Enter your product code:\n");
@@ -306,12 +197,122 @@ public class Main {
                  System.out.println("Product code : " + code + " is already existed!");
       
 	}
-	
     private static void addNewProduct(Product product){
         products.add(product);
     }
+	private static boolean addCustomer(Cart cart) {
+		if(!cart.isEmpty()) {
+			System.out.println("-------------------------------Before Check out, give me your information-------------------------------");
+			System.out.println("Enter your identification Number : "); 
+			String id = scanner.nextLine();
+			System.out.println("Enter your name : "); 
+			String name = scanner.nextLine();
+			System.out.println("Enter your email : "); 
+			String email = scanner.nextLine();
+			System.out.println("Enter your shipping address : "); 
+			String shippingAddress = scanner.nextLine();
+			System.out.println("Enter your billing address :  "); 
+			String billingAddress = scanner.nextLine();
+			System.out.println("\n-------------------------------Do you have discount card?---------------------------------------------");
+			double discountCard = 0D;
+			try {
+				System.out.println("\nEnter Pertage on your discount card : "); 
+				discountCard = scanner.nextDouble();	
+			}catch(Exception e) {
+				System.out.println("Discount must be double!\n"
+						+ "Checkout unsuccessful!");
+				scanner.nextLine();
+				return false;
+			}
+			
+			cart.setDiscount(discountCard);
+			Customer customer = new Customer(id, name, email, shippingAddress, billingAddress);
+			customer.placeOrder(cart);
+			System.out.println("Do you accept?(Y/N):");
+			scanner.nextLine();
+			String accept = scanner.nextLine();
+			if(!accept.equalsIgnoreCase("Y")) {
+
+				List<Purchase> cancelledPurchase = customer.getCart().getPurchasedItems();
+                for(int j = 0; j < products.size(); j++) {				                        	
+                    
+                	Product product = products.get(j);
+                	for(int k = 0; k < cancelledPurchase.size(); k++){
+                        
+                		if((product.getID()).equals(cancelledPurchase.get(k).getProduct().getID())){
+                            product.setQtyInStock(product.getQtyInStock() + cancelledPurchase.get(k).getQty());
+                        }
+                    }	
+                }
+                customer.cancelOrder();   
+				return true;
+			}
+			customers.add(customer);
+			System.out.println("\n------------------------------------Your purchased Invoice----------------------------------------------");
+			showCustomer(customer);
+			
+			// renew purchaseNo for new customer
+			purchaseNo = 1;
+			System.out.println("Arigato!!!!");
+			scanner.nextLine();
+			return true;
+		}
+		else {
+			System.out.println("Please go to shopping frist!!!");
+			scanner.nextLine();
+			return false;
+		}
+	}
+
+	private static void removePurchase(Cart cart) {
+		System.out.println("Input purchaseNo to remove : "); 
+		String purNo = scanner.nextLine();
+		boolean exist = false;
+		Purchase pur = findPurchase(purNo, cart.getPurchasedItems());
+		if(pur != null) {
+			Purchase cancelledPurchase = pur;
+            for(int j = 0; j < products.size(); j++) {				                           
+                    Product product = products.get(j);
+                    if((product.getID()).equals(cancelledPurchase.getProduct().getID())){
+                        products.set(j, new Product(
+                                product.getID(), product.getName(),
+                                product.getDescription(),
+                                product.getQtyInStock() + cancelledPurchase.getQty(),
+                                product.getPrice()));
+                    }			                        
+            cart.removeItem(pur);				         
+            System.out.println("You products have been removed!");
+            exist = true;
+		}
+			
+	}																								
+		if(!exist){
+			System.out.println("Invalid product name or Order ID");
+		}
+		
+	}
+
 	
-	public static void showProductList() {
+	private static Purchase findPurchase(String purNo, List<Purchase> purchased) {
+		for(Purchase pu : purchased)
+			if(pu.getOrderNo().equals(purNo))
+				return pu;
+		return null;
+	}
+	private static Product findProduct(String id) {
+        for(Product product : products)
+            if(product.getID().equalsIgnoreCase(id))
+                return product;
+        return null;
+    }  
+	private static Customer findCustomer(String customerID) {
+	for(Customer customer : customers)
+		if(customer.getCustomerID().equals(customerID))
+			return customer;
+	return null;
+	}
+    
+	private static void showProductList() {
 		DrawingTable drawingTable;
 		System.out.println("----------------------Product List-------------------------\n");
 		drawingTable = new DrawingTable();
@@ -320,9 +321,8 @@ public class Main {
 			drawingTable.addRow(p.getID() , p.getName(), "$ " +  p.getPrice() + "", p.getQtyInStock() + "", p.getDescription());		
 			}
 		drawingTable.print();
-	}
-	
-	public static void showShoppingHistory() {
+	}	
+	private static void showShoppingHistory() {
 		DrawingTable drawingTable = new DrawingTable();
 		System.out.println("-----------------Shopping History------------------");
 		
@@ -332,9 +332,8 @@ public class Main {
 		}
 		
 		drawingTable.print();					
-	}
-	
-	public static void showMyShoppingCart(Cart cart) {
+	}	
+	private static void showMyShoppingCart(Cart cart) {
 		DrawingTable drawingTable = new DrawingTable();
 		System.out.println("--------------------My Shopping Cart----------------------------\n");
 		
@@ -347,27 +346,18 @@ public class Main {
 					"$ " + item.getPrice() + "");
 		}
 		drawingTable.print();
-	}
-	
-	public static void showCustomer(Customer customer) {
+	}	
+	private static void showCustomer(Customer customer) {
 		
 		System.out.println(customer.toString());
 		showMyShoppingCart(customer.getCart());
 		System.out.println("\nSubTotal : $" + customer.getCart().calculateSubTotal());
 		System.out.println("Discount : " + (customer.getCart().getDiscount()*100) + "%");
 		System.out.println("Total : $" + customer.getCart().calculateTotal());
-		scanner.nextLine();
+
 		
 	}
-	
-	public static Customer findCustomer(String customerID) {
-		for(Customer customer : customers)
-			if(customer.getCustomerID().equals(customerID))
-				return customer;
-		return null;
-	}
-	
-	public static void shoppingProduct(Cart cart) {
+	private static void shoppingProduct(Cart cart) {
 		System.out.print("Enter product code you want to buy : "); 
 		String proCode = scanner.nextLine();
 		System.out.println(proCode);
@@ -410,7 +400,6 @@ public class Main {
 
 		
 	}
-
 		
 }
 

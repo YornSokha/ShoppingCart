@@ -30,6 +30,7 @@ public class Cart {
 		purchasedItems.remove(item);
 	}
 	
+	
 	public List<Purchase> getPurchasedItems() {
 		return purchasedItems;
 	}
