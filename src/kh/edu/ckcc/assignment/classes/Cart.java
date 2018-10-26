@@ -20,6 +20,12 @@ public class Cart {
 		purchasedItems.add(item);
 	}
 	
+	public boolean isEmpty() {
+		if(purchasedItems.isEmpty())
+			return true;
+		return false;
+	}
+	
 	public void removeItem(Purchase item) {
 		purchasedItems.remove(item);
 	}
