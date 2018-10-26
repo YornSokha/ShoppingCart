@@ -129,7 +129,6 @@ public class Main {
 				quit = true;
 		}
 	}
-	
 
 	private static String menu() {
 
@@ -244,7 +243,8 @@ public class Main {
                         }
                     }	
                 }
-                customer.cancelOrder();   
+                customer.cancelOrder();  
+                System.out.println("You have concelled your products!");
 				return true;
 			}
 			customers.add(customer);
@@ -277,8 +277,8 @@ public class Main {
                         products.set(j, new Product(
                                 product.getID(), product.getName(),
                                 product.getDescription(),
-                                product.getQtyInStock() + cancelledPurchase.getQty(),
-                                product.getPrice()));
+                                product.getPrice(),
+                                product.getQtyInStock() + cancelledPurchase.getQty()));
                     }			                        
             cart.removeItem(pur);				         
             System.out.println("You products have been removed!");
